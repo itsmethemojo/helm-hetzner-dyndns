@@ -1,0 +1,37 @@
+# Default values for hetzner-dyndns.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+schedule: "*/15  * * * *"
+
+apiToken: ""
+
+image:
+  repository: zenika/terraform-azure-cli
+  pullPolicy: IfNotPresent
+  tag: release-6.1_terraform-1.0.6_azcli-2.28.1
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+#restartPolicy: Never
+#backoffLimit: 1
+
+domains:
+  - name: "example.com"
+    subdomains: ["@", "www"]
+#  - name: "anotherexample.com"
+#    subdomains: ["@", "www"]
+
+persistence:
+  storageClassName: local-path
+  storageSize: 1Gi
+  accessModes: ReadWriteOnce
+  mountPath: /terraform-dir
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

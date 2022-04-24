@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "hetzner-dyndns.fullname" . }}-terraform-files
+data:
+  base.tf: |
+    terraform {
+      required_providers {
+        hetznerdns = {
+          source = "timohirt/hetznerdns"
+          version = "2.1.0"
+        }
+        http = {
+          source = "hashicorp/http"
+          version = "2.1.0"
+        }
+      }
+      required_version = ">= 0.13"
+    }
+
+    variable "hetznerdns_token" {}
+
+    provider "hetznerdns" {
+      apitoken = var.hetznerdns_token
+    }
+
+    provider "http" {}
+
+    data "http" "ifconfig_ip" {
+      url = "https://ifconfig.me/ip"
+    }
+{{- range $domain, $domainData := .Values.domains }}
+  {{ $domainData.name | replace "-" "_" | replace "." "_" }}.tf: |
+    data "hetznerdns_zone" "{{ $domainData.name | replace "-" "_" | replace "." "_" }}" {
+        name = "{{ $domainData.name }}"
+    }
+{{- range $subdomain := $domainData.subdomains }}
+    resource "hetznerdns_record" "{{ $domainData.name | replace "-" "_" | replace "." "_" }}_{{ $subdomain | replace "-" "_" | replace "." "_" | replace "@" "at_root" }}" {
+        zone_id = data.hetznerdns_zone.{{ $domainData.name | replace "-" "_" | replace "." "_" }}.id
+        name    = "{{ $subdomain | replace "-" "_" | replace "." "_" }}"
+        value   = data.http.ifconfig_ip.body
+        type    = "A"
+    }
+{{- end }}
+{{- end }}
+
+#TODO add ttl to A records
