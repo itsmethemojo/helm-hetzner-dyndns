@@ -8,11 +8,11 @@ data:
       required_providers {
         hetznerdns = {
           source = "timohirt/hetznerdns"
-          version = "2.1.0"
+          version = "{{ .Values.terraformProviderVersions.hetznerdns }}"
         }
         http = {
           source = "hashicorp/http"
-          version = "2.1.0"
+          version = "{{ .Values.terraformProviderVersions.http }}"
         }
       }
       required_version = ">= 0.13"
@@ -37,9 +37,10 @@ data:
 {{- range $subdomain := $domainData.subdomains }}
     resource "hetznerdns_record" "{{ $domainData.name | replace "-" "_" | replace "." "_" }}_{{ $subdomain | replace "-" "_" | replace "." "_" | replace "@" "at_root" }}" {
         zone_id = data.hetznerdns_zone.{{ $domainData.name | replace "-" "_" | replace "." "_" }}.id
-        name    = "{{ $subdomain | replace "-" "_" | replace "." "_" }}"
-        value   = data.http.ifconfig_ip.body
+        name    = "{{ $subdomain }}"
+        value   = data.http.ifconfig_ip.response_body
         type    = "A"
+        ttl     = {{ $domainData.ttl | default 80 }}
     }
 {{- end }}
 {{- end }}
