@@ -11,12 +11,12 @@ apiToken: ""
 image:
   repository: hashicorp/terraform
   pullPolicy: IfNotPresent
-  tag: 1.3.3
+  tag: 1.3.7
 
 helperImage:
   repository: alpine
   pullPolicy: IfNotPresent
-  tag: 3.16
+  tag: 3.17
 
 terraformProviderVersions:
   # -- see https://registry.terraform.io/providers/hashicorp/http/
