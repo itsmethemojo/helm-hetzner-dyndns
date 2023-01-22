@@ -16,7 +16,7 @@ image:
 helperImage:
   repository: alpine
   pullPolicy: IfNotPresent
-  tag: 3.16
+  tag: 3.17
 
 terraformProviderVersions:
   # -- see https://registry.terraform.io/providers/hashicorp/http/
