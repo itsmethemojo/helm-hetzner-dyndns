@@ -52,11 +52,11 @@ spec:
               echo "[INFO] starting sync every {{ .Values.dns.refreshInterval }} seconds" &&
               while true;
               do
-                if [ "$EXTENDED_LOGGING" == "false" ];
+                if [ "$EXTENDED_LOGGING" = "false" ];
                 then
-                  terraform apply -auto-approve 1>/dev/null;
+                  terraform apply -parallelism={{ .Values.parallelism }} -auto-approve 1>/dev/null;
                 else
-                  terraform apply -auto-approve;
+                  terraform apply -parallelism={{ .Values.parallelism }} -auto-approve;
                   echo "[DEBUG] waiting {{ .Values.dns.refreshInterval }} seconds";
                 fi
                 sleep {{ .Values.dns.refreshInterval }};
