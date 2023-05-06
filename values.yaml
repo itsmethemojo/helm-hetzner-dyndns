@@ -11,6 +11,9 @@ dns:
   # -- interval in seconds in which DNS records will be synched
   refreshInterval: 300
 
+# -- set the parallelism flag for terraform apply. this can be lowered if the kube api is a small single node
+parallelism: 10
+
 # -- toggle debug-like logging
 extendedLogging: false
 

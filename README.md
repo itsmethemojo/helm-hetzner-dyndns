@@ -55,6 +55,7 @@ docker run --rm -v $(pwd):/app -w/app jnorwood/helm-docs -t helm-docs-template.g
 | imagePullSecrets | list | `[]` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
+| parallelism | int | `10` | set the parallelism flag for terraform apply. this can be lowered if the kube api is a small single node |
 | persistence.accessModes | string | `"ReadWriteOnce"` |  |
 | persistence.storageClassName | string | `"local-path"` |  |
 | persistence.storageSize | string | `"1Gi"` |  |
