@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hetzner-dyndns.fullname" . }}
+  labels:
+    {{- include "hetzner-dyndns.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "hetzner-dyndns.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hetzner-dyndns.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hetzner-dyndns.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+          args:
+            - -c
+            - >
+              cd /terraform-files &&
+              all_files="$(ls -1 | xargs)" &&
+              echo $all_files &&
+              cd /terraform-dir &&
+              rm -rf terraform/.terraform terraform/.terraform.lock.hcl &&
+              mkdir -p terraform/hostnames-in-namespace &&
+              for one_file in $(echo $all_files);
+              do
+                cp /terraform-files/$one_file "$(echo $one_file | tr '_' '/')";
+              done &&
+              ls -laR &&
+              cd terraform &&
+              terraform init &&
+              echo "[INFO] starting sync every {{ .Values.dns.refreshInterval }} seconds" &&
+              while true;
+              do
+                if [ "$EXTENDED_LOGGING" == "false" ];
+                then
+                  terraform apply -auto-approve 1>/dev/null;
+                else
+                  terraform apply -auto-approve;
+                  echo "[DEBUG] waiting {{ .Values.dns.refreshInterval }} seconds";
+                fi
+                sleep {{ .Values.dns.refreshInterval }};
+              done
+          env:
+            - name: EXTENDED_LOGGING
+              value: {{ .Values.extendedLogging | quote }}
+            - name: TF_VAR_domain
+              value: {{ .Values.dns.domain }}
+            - name: TF_VAR_ttl
+              value: {{ .Values.dns.ttl | quote }}
+            - name: TF_VAR_api_token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hetzner-dyndns.fullname" . }}
+                  key: apiToken
+                  optional: false
+          volumeMounts:
+            - mountPath: /terraform-dir
+              name: {{ include "hetzner-dyndns.fullname" . }}-volume
+            - mountPath: /terraform-files
+              name: {{ include "hetzner-dyndns.fullname" . }}-terraform-files
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: {{ include "hetzner-dyndns.fullname" . }}-volume
+          persistentVolumeClaim:
+            claimName: {{ include "hetzner-dyndns.fullname" . }}
+        - configMap:
+            name: {{ include "hetzner-dyndns.fullname" . }}-terraform-files
+          name: {{ include "hetzner-dyndns.fullname" . }}-terraform-files
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

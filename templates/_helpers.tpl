@@ -60,10 +60,3 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
-
-{{/*
-Checksum of relevant config values to check if init job has to be run again
-*/}}
-{{- define "hetzner-dyndns.configChecksum" -}}
-{{ ( printf "%s %s" ( .Values.terraformProviderVersions | toYaml | sha256sum ) ( .Values.domains | toYaml | sha256sum ) ) | sha256sum | printf "%.*s" 10  }}
-{{- end }}

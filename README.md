@@ -1,8 +1,22 @@
 # hetzner-dyndns
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A helm chart to regulary update dynamic dns entries on hetzner dns. This gets handy when managing multiple subdomains with an ingress controller.
+A lightweight external-dns operator for hetzner dns.
+Similar to kubernetes-sigs/external-dns it creates dns entries for ingresses with the external-dns.alpha.kubernetes.io/hostname annotation.
+It will update your dns entries in a specified interval.
+
+To keep it as less code as possible the kubernetes access and the hetzner dns access is all managed via terraform providers.
+
+## create ingress annotations for the operator
+
+do not forget the trailing dot when annotating the ingress as it is [also used here](https://github.com/kubernetes-sigs/external-dns#running-locally)
+
+```
+helm install my-hetzner-dyndns itsmethemojo/hetzner-dyndns --set dns.domain=my-domain.org --set dns.apiToken=ABC123
+
+kubectl annotate ingress my-ingress-with-dns "external-dns.alpha.kubernetes.io/hostname=nginx.my-domain.org."
+```
 
 ## update docs
 
@@ -14,37 +28,46 @@ docker run --rm -v $(pwd):/app -w/app jnorwood/helm-docs -t helm-docs-template.g
 
 * [Hetzner DNS API console](https://dns.hetzner.com/) to create the API token
 * [Chart on Artifact HUB](https://artifacthub.io/packages/helm/itsmethemojo/hetzner-dyndns)
-* [hetznerdns terraform provider on github](https://github.com/timohirt/terraform-provider-hetznerdns)
+* hetznerdns terraform provider on [github](https://github.com/timohirt/terraform-provider-hetznerdns) or [terraform.io](https://registry.terraform.io/providers/timohirt/hetznerdns/latest/docs)
+* kubernetes terraform provider on [github](https://github.com/hashicorp/terraform-provider-kubernetes) or [terraform.io](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)
+
+## Source Code
+
+* <https://github.com/itsmethemojo/helm-hetzner-dyndns>
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
-| apiToken | string | `""` | hetzner dns api token, see https://dns.hetzner.com/ |
-| domains[0] | object | `{"name":"example.com","subdomains":["@","www"]}` | DNS hosted zone and subdomains |
-| domains[0].subdomains[0] | string | `"@"` | sets A Record for example.com |
-| domains[0].subdomains[1] | string | `"www"` | sets A Record for www.example.com |
+| dns.apiToken | string | `""` | hetzner dns api token, see https://dns.hetzner.com/ |
+| dns.domain | string | `"example.com"` | hetzner dns zone domain |
+| dns.refreshInterval | int | `300` | interval in seconds in which DNS records will be synched |
+| dns.ttl | int | `80` | hetzner dns ttl for entries, different ttl per subdomain via annotation is not yet supported |
+| extendedLogging | bool | `false` | toggle debug-like logging |
 | fullnameOverride | string | `""` |  |
 | helperImage.pullPolicy | string | `"IfNotPresent"` |  |
 | helperImage.repository | string | `"alpine"` |  |
-| helperImage.tag | float | `3.16` |  |
+| helperImage.tag | float | `3.17` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"hashicorp/terraform"` |  |
-| image.tag | string | `"1.3.3"` |  |
+| image.tag | string | `"1.4.5"` |  |
 | imagePullSecrets | list | `[]` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | persistence.accessModes | string | `"ReadWriteOnce"` |  |
 | persistence.storageClassName | string | `"local-path"` |  |
 | persistence.storageSize | string | `"1Gi"` |  |
+| podAnnotations | object | `{}` |  |
+| podSecurityContext | object | `{}` |  |
 | resources.limits.cpu | string | `"100m"` |  |
 | resources.limits.memory | string | `"128Mi"` |  |
 | resources.requests.cpu | string | `"100m"` |  |
 | resources.requests.memory | string | `"128Mi"` |  |
-| schedule | string | `"*/15  * * * *"` | cron schedule for refreshing dns entries |
-| terraformProviderVersions.hetznerdns | string | `"2.2.0"` | see https://registry.terraform.io/providers/timohirt/hetznerdns/ |
-| terraformProviderVersions.http | string | `"3.1.0"` | see https://registry.terraform.io/providers/hashicorp/http/ |
+| securityContext | object | `{}` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `""` |  |
 | tolerations | list | `[]` |  |
 
 ----------------------------------------------

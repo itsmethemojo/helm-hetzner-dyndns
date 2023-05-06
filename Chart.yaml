@@ -1,8 +1,13 @@
 apiVersion: v2
 name: hetzner-dyndns
-description: A helm chart to regulary update dynamic dns entries on hetzner dns. This gets handy when managing multiple subdomains with an ingress controller.
+description: |
+  A lightweight external-dns operator for hetzner dns. 
+  Similar to kubernetes-sigs/external-dns it creates dns entries for ingresses with the external-dns.alpha.kubernetes.io/hostname annotation.
+  It will update your dns entries in a specified interval. 
+  
+  To keep it as less code as possible the kubernetes access and the hetzner dns access is all managed via terraform providers.
 type: application
-version: 0.2.3
+version: 1.0.0
 icon: https://itsmethemojo.github.io/helm-charts/icon.png
 sources:
   - https://github.com/itsmethemojo/helm-hetzner-dyndns
