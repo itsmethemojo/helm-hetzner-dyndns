@@ -8,6 +8,16 @@
 
 {{ template "chart.homepageLine" . }}
 
+## create ingress annotations for the operator
+
+do not forget the trailing dot when annotating the ingress as it is [also used here](https://github.com/kubernetes-sigs/external-dns#running-locally)
+
+```
+helm install my-hetzner-dyndns itsmethemojo/hetzner-dyndns --set dns.domain=my-domain.org --set dns.apiToken=ABC123
+
+kubectl annotate ingress my-ingress-with-dns "external-dns.alpha.kubernetes.io/hostname=nginx.my-domain.org."
+```
+
 ## update docs
 
 ```
@@ -18,7 +28,9 @@ docker run --rm -v $(pwd):/app -w/app jnorwood/helm-docs -t helm-docs-template.g
 
 * [Hetzner DNS API console](https://dns.hetzner.com/) to create the API token
 * [Chart on Artifact HUB](https://artifacthub.io/packages/helm/itsmethemojo/hetzner-dyndns)
-* [hetznerdns terraform provider on github](https://github.com/timohirt/terraform-provider-hetznerdns)
+* hetznerdns terraform provider on [github](https://github.com/timohirt/terraform-provider-hetznerdns) or [terraform.io](https://registry.terraform.io/providers/timohirt/hetznerdns/latest/docs)
+* kubernetes terraform provider on [github](https://github.com/hashicorp/terraform-provider-kubernetes) or [terraform.io](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs)
+
 
 {{ template "chart.maintainersSection" . }}
 

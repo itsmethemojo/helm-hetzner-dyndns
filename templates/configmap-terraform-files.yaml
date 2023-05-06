@@ -3,46 +3,13 @@ kind: ConfigMap
 metadata:
   name: {{ include "hetzner-dyndns.fullname" . }}-terraform-files
 data:
-  base.tf: |
-    terraform {
-      required_providers {
-        hetznerdns = {
-          source = "timohirt/hetznerdns"
-          version = "{{ .Values.terraformProviderVersions.hetznerdns }}"
-        }
-        http = {
-          source = "hashicorp/http"
-          version = "{{ .Values.terraformProviderVersions.http }}"
-        }
-      }
-      required_version = ">= 0.13"
-    }
-
-    variable "hetznerdns_token" {}
-
-    provider "hetznerdns" {
-      apitoken = var.hetznerdns_token
-    }
-
-    provider "http" {}
-
-    data "http" "ifconfig_ip" {
-      url = "https://ifconfig.me/ip"
-    }
-{{- range $domain, $domainData := .Values.domains }}
-  {{ $domainData.name | replace "-" "_" | replace "." "_" }}.tf: |
-    data "hetznerdns_zone" "{{ $domainData.name | replace "-" "_" | replace "." "_" }}" {
-        name = "{{ $domainData.name }}"
-    }
-{{- range $subdomain := $domainData.subdomains }}
-    resource "hetznerdns_record" "{{ $domainData.name | replace "-" "_" | replace "." "_" }}_{{ $subdomain | replace "-" "_" | replace "." "_" | replace "@" "at_root" }}" {
-        zone_id = data.hetznerdns_zone.{{ $domainData.name | replace "-" "_" | replace "." "_" }}.id
-        name    = "{{ $subdomain }}"
-        value   = data.http.ifconfig_ip.response_body
-        type    = "A"
-        ttl     = {{ $domainData.ttl | default 80 }}
-    }
-{{- end }}
-{{- end }}
-
-#TODO add ttl to A records
+  {{- $files := .Files }}
+  {{- range $path, $_ := .Files.Glob "**/**.tf" }}
+  {{ $path | replace "/" "_" }}: |
+{{ $files.Get $path | indent 4 }}
+  {{- end }}
+#TODO add lock file
+  {{- range $path, $_ := .Files.Glob "**/**.lock.hcl" }}
+  {{ $path | replace "/" "_" }}: |
+{{ $files.Get $path | indent 4 }}
+  {{- end }}
