@@ -2,9 +2,7 @@ data "http" "ifconfig_ip" {
   url = "https://ifconfig.me/ip"
 }
 
-data "kubernetes_resources" "namespaces" {
-  api_version = "v1"
-  kind        = "Namespace"
+data "kubernetes_all_namespaces" "all" {
 }
 
 locals {
@@ -22,7 +20,7 @@ locals {
 }
 
 module "hostnames_in_namespaces" {
-  for_each  = toset([for namespace_object in data.kubernetes_resources.namespaces.objects : namespace_object.metadata.name])
+  for_each  = toset(data.kubernetes_all_namespaces.all.namespaces)
   source    = "./hostnames-in-namespace/"
   namespace = each.key
 }
@@ -32,7 +30,7 @@ data "hetznerdns_zone" "zone" {
 }
 
 resource "hetznerdns_record" "records" {
-  for_each = toset(local.hetzner_subdomains)
+  for_each = toset(compact(local.hetzner_subdomains))
   zone_id  = data.hetznerdns_zone.zone.id
   name     = each.key
   value    = data.http.ifconfig_ip.response_body
