@@ -3,6 +3,10 @@
     {
       "matchManagers": ["helm-values"],
       "groupName": "helm-values"
+    },
+    {
+      "matchManagers": ["terraform"],
+      "groupName": "terraform"
     }
   ]
 }
