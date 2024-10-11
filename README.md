@@ -1,6 +1,6 @@
 # hetzner-dyndns
 
-![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A lightweight external-dns operator for hetzner dns.
 Similar to kubernetes-sigs/external-dns it creates dns entries for ingresses with the external-dns.alpha.kubernetes.io/hostname annotation.
@@ -61,7 +61,6 @@ docker run --rm -v $(pwd):/app -w/app jnorwood/helm-docs -t helm-docs-template.g
 | persistence.storageSize | string | `"1Gi"` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
-| resources.limits.cpu | string | `"100m"` |  |
 | resources.limits.memory | string | `"128Mi"` |  |
 | resources.requests.cpu | string | `"100m"` |  |
 | resources.requests.memory | string | `"128Mi"` |  |
