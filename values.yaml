@@ -20,12 +20,12 @@ extendedLogging: false
 image:
   repository: hashicorp/terraform
   pullPolicy: IfNotPresent
-  tag: 1.9.7
+  tag: 1.14.7
 
 helperImage:
   repository: alpine
   pullPolicy: IfNotPresent
-  tag: 3.17
+  tag: 3.23
 
 imagePullSecrets: []
 nameOverride: ""
